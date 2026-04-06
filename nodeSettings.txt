@@ -1,4 +1,200 @@
-Logical bit wise operator:
+EDIT DISTANCES
+def edit_distance(s1, s2, i, j):
+    if i == 0: return j
+    if j == 0: return i
+    if s1[i-1] == s2[j-1]:
+        return edit_distance(s1, s2, i-1, j-1)
+     return 1 + min(
+        edit_distance(s1, s2, i, j-1),   
+        edit_distance(s1, s2, i-1, j),   
+        edit_distance(s1, s2, i-1, j-1))
+s1 = input("enter first")
+s2 = input("enter second")
+print(edit_distance(s1, s2, len(s1), len(s2)))
+
+
+
+WEIGHTED EDIT DISTANCE
+def edit_distance(s1, s2):
+    dp = [[0]*(len(s2)+1) for _ in range(len(s1)+1)]
+    for i in range(len(s1)+1): dp[i][0] = i
+    for j in range(len(s2)+1): dp[0][j] = j
+    for i in range(1, len(s1)+1):
+        for j in range(1, len(s2)+1):
+            dp[i][j] = dp[i-1][j-1] if s1[i-1]==s2[j-1] else 1 + min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1])
+    return dp[-1][-1]
+print(edit_distance("cat","dog"))
+
+
+
+
+EDIT DISTANCE FOR WORDS
+def word_edit_distance(s1, s2):
+    a, b = s1.split(), s2.split()
+    dp = [[i+j if i*j==0 else 0 for j in range(len(b)+1)] for i in range(len(a)+1)]
+    for i in range(1, len(a)+1):
+        for j in range(1, len(b)+1):
+            if a[i-1] == b[j-1]:
+                dp[i][j] = dp[i-1][j-1]
+            else:
+                dp[i][j] = 1 + min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1])
+    return dp[-1][-1]
+s1 = input("Enter sentence 1: ")
+s2 = input("Enter sentence 2: ")
+print("Edit Distance:", word_edit_distance(s1, s2))
+
+
+
+
+SOUNDEX
+def soundex(w):
+    w = w.upper()
+    d = {"BFPV":"1","CGJKQSXZ":"2","DT":"3","L":"4","MN":"5","R":"6"}
+    f, p = w[0], ""
+    for c in w[1:]:
+        for k in d:
+            if c in k:
+                if d[k] != p:
+                    f += d[k]
+                    p = d[k]
+                break
+    return (f + "000")[:4]
+words = ["Robert", "Rupert", "Ruia", "Herman", "Hermann"]
+for w in words:
+    print(w, soundex(w))
+
+
+
+
+NGRAM BIGRAM TRIGRAM
+def ngrams(text, n):
+    words = text.lower().split()
+    return [tuple(words[i:i+n]) for i in range(len(words)-n+1)]
+print(ngrams("the quick brown fox jumps", 2))
+
+
+JACCARD COEFFICIENT
+def ngrams(s, n):
+    return [s[i:i+n] for i in range(len(s)-n+1)]
+def jaccard(a, b):
+    a, b = set(a), set(b)
+    return len(a & b) / len(a | b)
+s1 = "HEllo world "
+s2 = "byee world"
+t1 = ngrams(s1, 3)
+t2 = ngrams(s2, 3)
+print(jaccard(t1, t2))
+
+PAGE RANK
+out = {"A":["B","C"], "B":["C"], "C":["A"]}
+inn = {"A":["C"], "B":["A"], "C":["A","B"]}
+pr = {"A":1, "B":1, "C":1}
+def pr_calc(n):
+    s = 0
+    for i in inn[n]:
+        s += pr[i] / len(out[i])
+    pr[n] = 0.15 + 0.85 * s
+for _ in range(3):
+    for n in pr:
+        pr_calc(n)
+    print(pr)
+
+
+RET in alphabetical order
+docs = {
+    1: "Information retrieval is an essential aspect of search engines.",
+    2: "The fiels of information retrieval focuses on algorithms.",
+    3: "Search engines use retrieval techniques to improve performance.",
+    4: "Deep learning models are used for information retrieval tasks."}
+index = {}
+for i in docs:
+    for w in docs[i].lower().replace('.', '').split():
+        index.setdefault(w, []).append(i)
+q = "retrieval"
+print("Documents containing the query 'retrieval':", index.get(q, []))
+print("\nInverted Index (Alphabetical Order):")
+for w in sorted(index):
+    print(w, "->", index[w])
+print("\nTotal number of unique terms indexed:", len(index))
+print("Documents containing the query 'retrieval':", index.get(q, []))
+
+
+VECTOR SPACE document similarity 
+from collections import Counter
+import numpy as np
+def vector(text):
+    return Counter(text.lower().split())
+def cosine(v1, v2):
+    words = set(v1) | set(v2)
+    a = np.array([v1.get(w,0) for w in words])
+    b = np.array([v2.get(w,0) for w in words])
+    return np.dot(a,b) / (np.linalg.norm(a)*np.linalg.norm(b))
+t1 = "this is a sample text"
+t2 = "this is another text"
+print(cosine(vector(t1), vector(t2)))
+
+
+PREPROCESSING DIRECT TEXT
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+import nltk
+nltk.download('punkt')
+nltk.download('stopwords')
+text = "This is a sample sentence showing stop words removal"
+words = word_tokenize(text)
+stop = set(stopwords.words('english'))
+filtered = [w for w in words if w not in stop]
+print(filtered)
+
+
+ #stopword 
+stop_words = { "a", "an", "the", "is", "are", "was", "were", "in", "on", "at", "of", "and", "or", "to", "for", "with", "as", "by", "this", "that", "it", "from", "be", "has", "have", "had"}
+text = input("enter text")
+words = text.lower().split()
+filterword = [w for w in words if w not in stop_words]
+processed_text = " ".join(filterword)
+print(processed_text)
+
+
+PREPROCESSING BY FILE IMPORTING
+from nltk.corpus import stopwords
+import nltk
+nltk.download('stopwords')
+text = open("prac7.txt").read().lower().split()
+stop = set(stopwords.words('english'))
+filtered = [w for w in text if w not in stop]
+open("outputdoc.txt", "w").write(" ".join(filtered))
+print(filtered)
+
+WEB CRAWLER
+import requests
+from bs4 import BeautifulSoup
+url = input("Enter URL: ")
+html = requests.get(url).text
+soup = BeautifulSoup(html, "html.parser")
+links = [a.get("href") for a in soup.find_all("a") if a.get("href")]
+for l in links:
+    print(l)
+    
+
+XML to CSV
+import requests, pandas as pd
+import xml.etree.ElementTree as ET
+url = "https://timesofindia.indiatimes.com/rssfeedstopstories.cms"
+xml_data = requests.get(url).content
+root = ET.fromstring(xml_data)
+items = root.find("channel").findall("item")
+data = []
+for item in items:
+    row = {child.tag: child.text for child in item}
+    data.append(row)
+df = pd.DataFrame(data)
+df.to_csv("output.csv", index=False)
+print("Saved as output.csv")
+
+logical bitwise:
+
+
 from sklearn.feature_extraction.text import CountVectorizer
 import pandas as pd
 
@@ -13,337 +209,59 @@ plays = {
 
 words = ["Anthony","Brutus","Caeser","Calpurnia","Cleopatra","mercy","worser"]
 
-# lowercase everything
 words_lower = [w.lower() for w in words]
 texts_lower = [p.lower() for p in plays.values()]
 
 vectorizer = CountVectorizer(vocabulary=words_lower)
 X = vectorizer.fit_transform(texts_lower).toarray()
 
-# keep original word names for display
 matrix = pd.DataFrame(X, index=plays.keys(), columns=words)
 
 print("Matrix:\n")
 print(matrix)
 
-# AND query
-res = matrix[(matrix["Anthony"] > 0) & (matrix["mercy"] > 0)]
 
-if not res.empty:
-    print("\nAnthony & Calpurnia are together in play:")
-    print(res.index[0])
-    print(res.values[0])
-else:
-    print("\nNo play found with both Anthony and Calpurnia")
+res_and = matrix[(matrix["Anthony"] > 0) & (matrix["Brutus"] > 0)]
+print("\nAND (Anthony AND Brutus):")
+print(res_and.index.tolist())
 
 
+res_or = matrix[(matrix["Anthony"] > 0) | (matrix["Brutus"] > 0)]
+print("\nOR (Anthony OR Brutus):")
+print(res_or.index.tolist())
 
 
-EDIT DISTANCES
+res_and_not = matrix[(matrix["Anthony"] > 0) & (matrix["Brutus"] == 0)]
+print("\nAND NOT (Anthony AND NOT Brutus):")
+print(res_and_not.index.tolist())
 
-def edit_distance(s1, s2, i, j):
-    if i == 0: return j
-    if j == 0: return i
- 
-    if s1[i-1] == s2[j-1]:
-        return edit_distance(s1, s2, i-1, j-1)
- 
-    return 1 + min(
-        edit_distance(s1, s2, i, j-1),   # insert
-        edit_distance(s1, s2, i-1, j),   # delete
-        edit_distance(s1, s2, i-1, j-1)  # replace
-    )
 
-s1 = input("enter first")
-s2 = input("enter second")
+res_combo = matrix[
+    ((matrix["Anthony"] > 0) | (matrix["Brutus"] > 0)) &
+    (matrix["mercy"] > 0)
+]
+print("\n(Anthony OR Brutus) AND mercy:")
+print(res_combo.index.tolist())
 
-print(edit_distance(s1, s2, len(s1), len(s2)))
 
+res_exam = matrix[
+    (matrix["Caeser"] > 0) &
+    ((matrix["mercy"] > 0) | (matrix["worser"] > 0))
+]
+print("\n(Caeser AND (mercy OR worser)):")
+print(res_exam.index.tolist())
 
+cosine document similarity:
 
-WEIGHTED EDIT DISTANCE
-def edit_distance(s1, s2):
-    dp = [[0]*(len(s2)+1) for _ in range(len(s1)+1)]
-    for i in range(len(s1)+1): dp[i][0] = i
-    for j in range(len(s2)+1): dp[0][j] = j
-    for i in range(1, len(s1)+1):
-        for j in range(1, len(s2)+1):
-            dp[i][j] = dp[i-1][j-1] if s1[i-1]==s2[j-1] else 1 + min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1])
-    return dp[-1][-1]
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
-print(edit_distance("cat","dog"))
+doc1 = "natural language processing is fun"
+doc2 = "language processing is interesting"
 
+vec = CountVectorizer()
+X = vec.fit_transform([doc1, doc2])
 
+similarity = cosine_similarity(X)[0][1]
 
-
-EDIT DISTANCE FOR WORDS
-
-def word_edit_distance(s1, s2):
-    a, b = s1.split(), s2.split()
-    dp = [[i+j if i*j==0 else 0 for j in range(len(b)+1)] for i in range(len(a)+1)]
-
-    for i in range(1, len(a)+1):
-        for j in range(1, len(b)+1):
-            if a[i-1] == b[j-1]:
-                dp[i][j] = dp[i-1][j-1]
-            else:
-                dp[i][j] = 1 + min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1])
-
-    return dp[-1][-1]
-
-
-
-
-SOUNDEX
-
-def soundex(w):
-    w = w.upper()
-    d = {"BFPV":"1","CGJKQSXZ":"2","DT":"3","L":"4","MN":"5","R":"6"}
-    f, p = w[0], ""
-
-    for c in w[1:]:
-        for k in d:
-            if c in k:
-                if d[k] != p:
-                    f += d[k]
-                    p = d[k]
-                break
-
-    return (f + "000")[:4]
-
-# Example usage
-words = ["Robert", "Rupert", "Ruia", "Herman", "Hermann"]
-
-for w in words:
-    print(w, soundex(w))
-
-
-
-
-NGRAM
-
-def ngrams(text, n):
-    words = text.lower().split()
-    return [tuple(words[i:i+n]) for i in range(len(words)-n+1)]
-
-print(ngrams("the quick brown fox jumps", 2))
-
-
-
-BIGRAM
-def ngrams(text, n):
-    words = text.lower().split()
-    return [tuple(words[i:i+n]) for i in range(len(words)-n+1)]
-
-print(ngrams("the quick brown fox jumps over the lazy dog", 2))
-
-
-
-TRIGRAM
-
-def ngrams(text, n):
-    words = text.lower().split()
-    return [tuple(words[i:i+n]) for i in range(len(words)-n+1)]
-
-print(ngrams("the quick brown fox jumps over the lazy dog", 3))
-
-
-
-
-JACCARD COEFFICIENT
-
-def ngrams(s, n):
-    return [s[i:i+n] for i in range(len(s)-n+1)]
-
-def jaccard(a, b):
-    a, b = set(a), set(b)
-    return len(a & b) / len(a | b)
-
-s1 = "HEllo world "
-s2 = "byee world"
-
-t1 = ngrams(s1, 3)
-t2 = ngrams(s2, 3)
-
-print(jaccard(t1, t2))
-
-PAGE RANK
-
-
-out = {"A":["B","C"], "B":["C"], "C":["A"]}
-inn = {"A":["C"], "B":["A"], "C":["A","B"]}
-pr = {"A":1, "B":1, "C":1}
-
-def pr_calc(n):
-    s = 0
-    for i in inn[n]:
-        s += pr[i] / len(out[i])
-    pr[n] = 0.15 + 0.85 * s
-
-for _ in range(3):
-    for n in pr:
-        pr_calc(n)
-    print(pr)
-
-
-
-
-RET in alphabetical order
-docs = {
-    1: "Information retrieval is an essential aspect of search engines.",
-    2: "The fiels of information retrieval focuses on algorithms.",
-    3: "Search engines use retrieval techniques to improve performance.",
-    4: "Deep learning models are used for information retrieval tasks."
-}
-
-index = {}
-
-# build index
-for i in docs:
-    for w in docs[i].lower().replace('.', '').split():
-        index.setdefault(w, []).append(i)
-
-# output
-q = "retrieval"
-print("Documents containing the query 'retrieval':", index.get(q, []))
-
-print("\nInverted Index (Alphabetical Order):")
-for w in sorted(index):
-    print(w, "->", index[w])
-
-print("\nTotal number of unique terms indexed:", len(index))
-print("Documents containing the query 'retrieval':", index.get(q, []))
-
-
-
-RET
-docs = {
-    1: "information retrieval is important",
-    2: "retrieval uses algorithms",
-    3: "search uses retrieval"
-}
-
-index = {}
-
-# build index
-for i in docs:
-    for w in docs[i].lower().split():
-        if w not in index:
-            index[w] = []
-        index[w].append(i)
-
-# search
-q = "retrieval"
-print(index.get(q, []))
-
-
-
-
-
-
-VECTOR SPACE
-from collections import Counter
-import numpy as np
-
-def vector(text):
-    return Counter(text.lower().split())
-
-def cosine(v1, v2):
-    words = set(v1) | set(v2)
-    a = np.array([v1.get(w,0) for w in words])
-    b = np.array([v2.get(w,0) for w in words])
-    return np.dot(a,b) / (np.linalg.norm(a)*np.linalg.norm(b))
-
-t1 = "this is a sample text"
-t2 = "this is another text"
-
-print(cosine(vector(t1), vector(t2)))
-
-
-
-PREPROCESSING DIRECT TEXT
-
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
-import nltk
-
-nltk.download('punkt')
-nltk.download('stopwords')
-
-text = "This is a sample sentence showing stop words removal"
-
-words = word_tokenize(text)
-stop = set(stopwords.words('english'))
-
-filtered = [w for w in words if w not in stop]
-
-print(filtered)
-
-
-for zex #stopword 
-
-stop_words = { "a", "an", "the", "is", "are", "was", "were", "in", "on", "at", "of", "and", "or", "to", "for", "with", "as", "by", "this", "that", "it", "from", "be", "has", "have", "had"}
-text = input("enter text")
-words = text.lower().split()
-filterword = [w for w in words if w not in stop_words]
-processed_text = " ".join(filterword)
-print(processed_text)
-
-
-
-
-PREPROCESSING BY FILE IMPORTING
-
-from nltk.corpus import stopwords
-import nltk
-
-nltk.download('stopwords')
-
-text = open("prac7.txt").read().lower().split()
-stop = set(stopwords.words('english'))
-
-filtered = [w for w in text if w not in stop]
-
-open("outputdoc.txt", "w").write(" ".join(filtered))
-print(filtered)
-
-
-
-WEB CRAWLER
-
-import requests
-from bs4 import BeautifulSoup
-
-url = input("Enter URL: ")
-
-html = requests.get(url).text
-soup = BeautifulSoup(html, "html.parser")
-
-links = [a.get("href") for a in soup.find_all("a") if a.get("href")]
-
-for l in links:
-    print(l)
-    
-
-XML to CSV
-
-import requests, pandas as pd
-import xml.etree.ElementTree as ET
-
-url = "https://timesofindia.indiatimes.com/rssfeedstopstories.cms"
-
-xml_data = requests.get(url).content
-root = ET.fromstring(xml_data)
-
-# Get all news items
-items = root.find("channel").findall("item")
-
-data = []
-for item in items:
-    row = {child.tag: child.text for child in item}
-    data.append(row)
-
-df = pd.DataFrame(data)
-df.to_csv("output.csv", index=False)
-
-print("Saved as output.csv")
+print("Similarity:", similarity)
