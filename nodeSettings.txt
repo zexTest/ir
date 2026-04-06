@@ -13,8 +13,8 @@ def edit_distance(s1, s2, i, j):
         edit_distance(s1, s2, i-1, j-1)  # replace
     )
 
-s1 = input()
-s2 = input()
+s1 = input("enter first")
+s2 = input("enter second")
 
 print(edit_distance(s1, s2, len(s1), len(s2)))
 
@@ -239,6 +239,16 @@ filtered = [w for w in words if w not in stop]
 print(filtered)
 
 
+for zex #stopword 
+
+stop_words = { "a", "an", "the", "is", "are", "was", "were", "in", "on", "at", "of", "and", "or", "to", "for", "with", "as", "by", "this", "that", "it", "from", "be", "has", "have", "had"}
+text = input("enter text")
+words = text.lower().split()
+filterword = [w for w in words if w not in stop_words]
+processed_text = " ".join(filterword)
+print(processed_text)
+
+
 
 
 PREPROCESSING BY FILE IMPORTING
@@ -262,14 +272,37 @@ WEB CRAWLER
 
 import requests
 from bs4 import BeautifulSoup
-url = input()
-word = input()
-headers = {"User-Agent": "Mozilla/5.0"}
-html = requests.get(url, headers=headers).text
+
+url = input("Enter URL: ")
+
+html = requests.get(url).text
 soup = BeautifulSoup(html, "html.parser")
-text = soup.get_text().lower()
-print("Count:", text.count(word.lower()))
-links = soup.find_all("a")
-print("Links:", len(links))
-for l in links[:5]:
-    print(l.get("href"))
+
+links = [a.get("href") for a in soup.find_all("a") if a.get("href")]
+
+for l in links:
+    print(l)
+    
+
+XML to CSV
+
+import requests, pandas as pd
+import xml.etree.ElementTree as ET
+
+url = "https://timesofindia.indiatimes.com/rssfeedstopstories.cms"
+
+xml_data = requests.get(url).content
+root = ET.fromstring(xml_data)
+
+# Get all news items
+items = root.find("channel").findall("item")
+
+data = []
+for item in items:
+    row = {child.tag: child.text for child in item}
+    data.append(row)
+
+df = pd.DataFrame(data)
+df.to_csv("output.csv", index=False)
+
+print("Saved as output.csv")
