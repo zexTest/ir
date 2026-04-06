@@ -1,3 +1,44 @@
+Logical bit wise operator:
+from sklearn.feature_extraction.text import CountVectorizer
+import pandas as pd
+
+plays = {
+    "Anthony and Cleopatra": "Anthony is there, Brutus is Caeser is with Cleopatra mercy worser.",
+    "Julius Ceaser": "Anthony is there, Brutus is Caeser is but Calpurnia is.",
+    "The Tempest": "mercy worser",
+    "Ham let": "Caeser and Brutus are present with mercy and worser",
+    "Othello": "Caeser is present with mercy and worser",
+    "Macbeth": "Anthony is there, Caeser, mercy."
+}
+
+words = ["Anthony","Brutus","Caeser","Calpurnia","Cleopatra","mercy","worser"]
+
+# lowercase everything
+words_lower = [w.lower() for w in words]
+texts_lower = [p.lower() for p in plays.values()]
+
+vectorizer = CountVectorizer(vocabulary=words_lower)
+X = vectorizer.fit_transform(texts_lower).toarray()
+
+# keep original word names for display
+matrix = pd.DataFrame(X, index=plays.keys(), columns=words)
+
+print("Matrix:\n")
+print(matrix)
+
+# AND query
+res = matrix[(matrix["Anthony"] > 0) & (matrix["mercy"] > 0)]
+
+if not res.empty:
+    print("\nAnthony & Calpurnia are together in play:")
+    print(res.index[0])
+    print(res.values[0])
+else:
+    print("\nNo play found with both Anthony and Calpurnia")
+
+
+
+
 EDIT DISTANCES
 
 def edit_distance(s1, s2, i, j):
